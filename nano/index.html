@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nano Banana AI圖像編輯完整指南</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <div class="header__content">
+                <div class="header__brand">
+                    <div class="brand__logo">🍌</div>
+                    <div class="brand__text">
+                        <h1 class="brand__title">Nano Banana</h1>
+                        <span class="brand__subtitle">AI圖像編輯指南</span>
+                    </div>
+                </div>
+                <nav class="header__nav">
+                    <button class="nav-item active" data-section="home">首頁</button>
+                    <button class="nav-item" data-section="features">功能介紹</button>
+                    <button class="nav-item" data-section="examples">實戰範例</button>
+                    <button class="nav-item" data-section="database">提示詞庫</button>
+                    <button class="nav-item" data-section="generator">提示詞生成器</button>
+                    <button class="nav-item" data-section="tutorial">APP製作</button>
+                </nav>
+                <div class="header__actions">
+                    <button class="btn btn--outline btn--sm" id="themeToggle">
+                        <span id="themeIcon">🌙</span>
+                    </button>
+                    <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu__content">
+            <button class="mobile-menu__close" id="closeMobileMenu">✕</button>
+            <nav class="mobile-nav">
+                <button class="mobile-nav-item active" data-section="home">🏠 首頁</button>
+                <button class="mobile-nav-item" data-section="features">✨ 功能介紹</button>
+                <button class="mobile-nav-item" data-section="examples">🎯 實戰範例</button>
+                <button class="mobile-nav-item" data-section="database">📖 提示詞庫</button>
+                <button class="mobile-nav-item" data-section="generator">🔧 提示詞生成器</button>
+                <button class="mobile-nav-item" data-section="tutorial">📱 APP製作</button>
+            </nav>
+        </div>
+    </div>
+
+    <main class="main">
+        <section class="section section--home active" id="home">
+            <div class="hero">
+                <div class="container">
+                    <div class="hero__content">
+                        <h1 class="hero__title">掌握 Nano Banana</h1>
+                        <p class="hero__subtitle">Google Gemini 2.5 Flash Image 專業教學與應用</p>
+                        <p class="hero__description">從入門到專家級應用，掌握最強AI圖像編輯工具</p>
+                        <div class="hero__actions">
+                            <button class="btn btn--primary btn--lg" data-action="start">開始學習</button>
+                            <button class="btn btn--outline btn--lg" data-action="examples">查看範例</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-section">
+                <div class="container">
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-number">300+</div>
+                            <div class="stat-label">提示詞數量</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">50+</div>
+                            <div class="stat-label">應用案例</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">13</div>
+                            <div class="stat-label">功能類別</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">3</div>
+                            <div class="stat-label">平台支援</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="features-preview">
+                <div class="container">
+                    <h2 class="section-title">三大核心功能</h2>
+                    <div class="features-grid">
+                        <div class="feature-card" style="background: var(--color-bg-1)">
+                            <div class="feature-icon">👤</div>
+                            <h3 class="feature-title">角色一致性</h3>
+                            <p class="feature-description">維持特定人物或物件的外觀一致性，包括臉部特徵、髮型與服裝風格</p>
+                        </div>
+                        <div class="feature-card" style="background: var(--color-bg-2)">
+                            <div class="feature-icon">🔄</div>
+                            <h3 class="feature-title">多圖融合</h3>
+                            <p class="feature-description">一次性融合多達三張圖片，將不同來源的元素巧妙組合</p>
+                        </div>
+                        <div class="feature-card" style="background: var(--color-bg-3)">
+                            <div class="feature-icon">💬</div>
+                            <h3 class="feature-title">語意理解</h3>
+                            <p class="feature-description">直覺式自然語言編輯，輸入簡單指令即可精準執行</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section section--features" id="features">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">功能特色詳解</h2>
+                    <p class="section-subtitle">深入了解 Nano Banana 的強大功能</p>
+                </div>
+
+                <div class="content-tabs">
+                    <div class="tab-buttons">
+                        <button class="tab-btn active" data-tab="consistency">角色一致性</button>
+                        <button class="tab-btn" data-tab="fusion">多圖融合</button>
+                        <button class="tab-btn" data-tab="understanding">語意理解</button>
+                    </div>
+
+                    <div class="tab-content">
+                        <div class="tab-panel active" id="consistency">
+                            <div class="tab-grid">
+                                <div class="tab-info">
+                                    <h3>角色一致性技術</h3>
+                                    <p>Nano Banana 能夠在多次編輯中保持角色的核心特徵不變，包括：</p>
+                                    <ul>
+                                        <li>臉部特徵與表情</li>
+                                        <li>髮型與髮色</li>
+                                        <li>服裝風格</li>
+                                        <li>體型比例</li>
+                                    </ul>
+                                    <div class="example-prompt">
+                                        <strong>範例提示詞：</strong>
+                                        <code>保持人物特徵一致，將場景更換為咖啡廳，服裝改為商務休閒</code>
+                                    </div>
+                                </div>
+                                <div class="tab-visual">
+                                    <div class="image-placeholder">
+                                        <div class="placeholder-icon">📸</div>
+                                        <div class="placeholder-text">角色一致性展示圖</div>
+                                        <div class="placeholder-desc">展示同一角色在不同場景中的一致性</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-panel" id="fusion">
+                            <div class="tab-grid">
+                                <div class="tab-info">
+                                    <h3>多圖融合技術</h3>
+                                    <p>同時處理多張圖片並智能合成，支援：</p>
+                                    <ul>
+                                        <li>最多三張圖片同時處理</li>
+                                        <li>智能元素識別與提取</li>
+                                        <li>自然光影與陰影調整</li>
+                                        <li>色彩平衡與統一</li>
+                                    </ul>
+                                    <div class="example-prompt">
+                                        <strong>範例提示詞：</strong>
+                                        <code>請將這些圖片融合成一張圖，每個物件和角色都不能缺漏</code>
+                                    </div>
+                                </div>
+                                <div class="tab-visual">
+                                    <div class="image-placeholder">
+                                        <div class="placeholder-icon">🔄</div>
+                                        <div class="placeholder-text">多圖融合效果展示</div>
+                                        <div class="placeholder-desc">展示多張圖片融合後的效果</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-panel" id="understanding">
+                            <div class="tab-grid">
+                                <div class="tab-info">
+                                    <h3>語意理解能力</h3>
+                                    <p>支援自然語言指令，理解複雜的編輯需求：</p>
+                                    <ul>
+                                        <li>直覺式語言描述</li>
+                                        <li>複雜場景理解</li>
+                                        <li>情感與氛圍調整</li>
+                                        <li>風格與材質轉換</li>
+                                    </ul>
+                                    <div class="example-prompt">
+                                        <strong>範例提示詞：</strong>
+                                        <code>營造溫暖的夕陽氛圍，讓人物看起來更加快樂和放鬆</code>
+                                    </div>
+                                </div>
+                                <div class="tab-visual">
+                                    <div class="image-placeholder">
+                                        <div class="placeholder-icon">💬</div>
+                                        <div class="placeholder-text">語意理解示例</div>
+                                        <div class="placeholder-desc">展示自然語言編輯的效果</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section section--examples" id="examples">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">實戰範例展示</h2>
+                    <p class="section-subtitle">看看 Nano Banana 能創造什麼樣的驚人效果</p>
+                </div>
+
+                <div class="examples-grid">
+                    <div class="example-item">
+                        <h3 class="example-title">真人轉公仔模型化</h3>
+                        <p class="example-description">將真人照片轉為精緻收藏模型，完整保持角色特徵</p>
+                        <div class="before-after">
+                            <div class="image-comparison">
+                                <div class="image-placeholder">
+                                    <img src="01.png" alt="原始人像照片">
+                                </div>
+                                <div class="comparison-arrow">→</div>
+                                <div class="image-placeholder">
+                                    <img src="02.png" alt="擬真收藏模型展示">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="example-prompt">
+                            <strong>使用提示詞：</strong>
+                            <div class="prompt-display">
+                                <code>將這張男士的圖片轉化為擬真的收藏模型展示照，並將其放置在一個精心設計的環境中，以凸顯模型的精緻細節和藝術氛圍</code>
+                                <button class="copy-btn" data-copy="將這張女孩的圖片轉化為擬真的收藏模型展示照，並將其放置在一個精心設計的環境中，以凸顯模型的精緻細節和藝術氛圍">📋</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="example-item">
+                        <h3 class="example-title">場景無縫轉換</h3>
+                        <p class="example-description">一鍵更換背景、服裝和手持物品</p>
+                        <div class="before-after">
+                            <div class="image-comparison">
+                                <div class="image-placeholder">
+                                    <img src="03.png" alt="室內人像">
+                                </div>
+                                <div class="comparison-arrow">→</div>
+                                <div class="image-placeholder">
+                                    <img src="04.png" alt="海邊度假風格">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="example-prompt">
+                            <strong>使用提示詞：</strong>
+                            <div class="prompt-display">
+                                <code>將場景換成在海邊、衣服換成藍色T恤、手上換成拿著小螃蟹</code>
+                                <button class="copy-btn" data-copy="將場景換成在海邊、衣服換成藍色T恤、手上換成拿著小螃蟹">📋</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="example-item">
+                        <h3 class="example-title">火柴人動作生成</h3>
+                        <p class="example-description">從簡單草圖生成複雜動作場景</p>
+                        <div class="before-after">
+                            <div class="image-comparison">
+                                <div class="image-placeholder">
+                                    <img src="05.png" alt="手繪火柴人草圖">
+                                </div>
+                                <div class="comparison-arrow">→</div>
+                                <div class="image-placeholder">
+                                    <img src="06.png" alt="賽博龐克風格動作">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="example-prompt">
+                            <strong>使用提示詞：</strong>
+                            <div class="prompt-display">
+                                <code>根據動作草圖來生成兩隻貓互相打鬥，並呈現賽博龐克風格</code>
+                                <button class="copy-btn" data-copy="根據動作草圖來生成兩隻貓互相打鬥，並呈現賽博龐克風格">📋</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="example-item">
+                        <h3 class="example-title">角色換裝</h3>
+                        <p class="example-description">真的超準確的耶，服裝單品都跟提供的一模一樣！</p>
+                        <div class="before-after">
+                            <div class="image-comparison">
+                                <div class="image-placeholder">
+                                    <img src="07.png" alt="角色換裝">
+                                </div>
+                                <div class="comparison-arrow">→</div>
+                                <div class="image-placeholder">
+                                    <img src="08.png" alt="賽博龐克風格動作">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="example-prompt">
+                            <strong>使用提示詞：</strong>
+                            <div class="prompt-display">
+                                <code>根據所提供的兩張上傳之參考圖,生成一位女孩在秋天傍晚穿上衣服的場景,她的臉部特徵 ,髮型,身材必須與第一張照片相同,她在夕陽灑落的公園小徑上,微風輕拂她的長髮,表情自然,輕鬆愉悅.寫實風格,8K高畫質,電影感光影</code>
+                                <button class="copy-btn" data-copy="根據所提供的兩張上傳之參考圖,生成一位女孩在秋天傍晚穿上衣服的場景,她的臉部特徵 ,髮型,身材必須與第一張照片相同,她在夕陽灑落的公園小徑上,微風輕拂她的長髮,表情自然,輕鬆愉悅.寫實風格,8K高畫質,電影感光影">📋</button>
+                            </div>
+                        </div>
+                    </div>
+                   <div class="example-item">
+                        <h3 class="example-title">追加物品</h3>
+                        <p class="example-description">真的超準確的耶，角色與物品都跟提供的一模一樣！</p>
+                        <div class="before-after">
+                            <div class="image-comparison">
+                                <div class="image-placeholder">
+                                    <img src="09.png" alt="追加物品">
+                                </div>
+                                <div class="comparison-arrow">→</div>
+                                <div class="image-placeholder">
+                                    <img src="10.png" alt="賽博龐克風格動作">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="example-prompt">
+                            <strong>使用提示詞：</strong>
+                            <div class="prompt-display">
+                                <code>「請讓上圖的人物手上拿著下圖的商品，並且露出開心的表情」</code>
+                                <button class="copy-btn" data-copy="「請讓上圖的人物手上拿著下圖的商品，並且露出開心的表情」">📋</button>
+                            </div>
+                        </div>
+                    </div>
+                   <div class="example-item">
+                        <h3 class="example-title">背景更換</h3>
+                        <p class="example-description">真的超準確的耶，背景轉換的一模一樣！</p>
+                        <div class="before-after">
+                            <div class="image-comparison">
+                                <div class="image-placeholder">
+                                    <img src="11.png" alt="追加物品">
+                                </div>
+                                <div class="comparison-arrow">→</div>
+                                <div class="image-placeholder">
+                                    <img src="12.png" alt="賽博龐克風格動作">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="example-prompt">
+                            <strong>使用提示詞：</strong>
+                            <div class="prompt-display">
+                                <code>將背景更改為百貨公司、讓二樓站滿人、將模特的衣服改成粉紅色</code>
+                                <button class="copy-btn" data-copy="將背景更改為百貨公司、讓二樓站滿人、將模特的衣服改成粉紅色">📋</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                   <div class="example-item">
+                        <h3 class="example-title">補畫</h3>
+                        <p class="example-description">真的超神奇的！</p>
+                        <div class="before-after">
+                            <div class="image-comparison">
+                                <div class="image-placeholder">
+                                    <img src="13.png" alt="自行補上">
+                                </div>
+                                <div class="comparison-arrow">→</div>
+                                <div class="image-placeholder">
+                                    <img src="14.png" alt="賽博龐克風格動作">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="example-prompt">
+                            <strong>使用提示詞：</strong>
+                            <div class="prompt-display">
+                                <code>請幫我畫他的身體</code>
+                                <button class="copy-btn" data-copy="請幫我畫他的身體">📋</button>
+                            </div>
+                        </div>
+                  <div class="example-item">
+                        <h3 class="example-title">Google 標註地圖作圖</h3>
+                        <p class="example-description">真的超神奇的！</p>
+                        <div class="before-after">
+                            <div class="image-comparison">
+                                <div class="image-placeholder">
+                                    <img src="15.png" alt="自行補上">
+                                </div>
+                                <div class="comparison-arrow">→</div>
+                                <div class="image-placeholder">
+                                    <img src="16.png" alt="賽博龐克風格動作">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="example-prompt">
+                            <strong>使用提示詞：</strong>
+                            <div class="prompt-display">
+                                <code>使用這個Google位置將地標製作為3D等距圖像（僅限建築物），以水彩畫的風格創建它 ，並直接覆蓋在原本地圖上</code>
+                                <button class="copy-btn" data-copy="使用這個Google位置將地標製作為3D等距圖像（僅限建築物），以水彩畫的風格創建它 ，                                並直接覆蓋在原本地圖上">📋</button>
+                            </div>
+                        </div>
+                    </div>
+                  <div class="example-item">
+                        <h3 class="example-title">空房室內設計</h3>
+                        <p class="example-description">真的超神奇的！</p>
+                        <div class="before-after">
+                            <div class="image-comparison">
+                                <div class="image-placeholder">
+                                    <img src="17.png" alt="空房室內設計">
+                                </div>
+                                <div class="comparison-arrow">→</div>
+                                <div class="image-placeholder">
+                                    <img src="18.png" alt="賽博龐克風格動作">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="example-prompt">
+                            <strong>使用提示詞：</strong>
+                            <div class="prompt-display">
+                                <code>在這房間幫我擺設了一些家具，但房間大小空間不能改變</code>
+                                <button class="copy-btn" data-copy="在這房間幫我擺設了一些家具，但房間大小空間不能改變">📋</button>
+                            </div>
+                        </div>
+                    </div>
+                  <div class="example-item">
+                        <h3 class="example-title"> 老舊照片上色</h3>
+                        <p class="example-description">真的超神奇的！</p>
+                        <div class="before-after">
+                            <div class="image-comparison">
+                                <div class="image-placeholder">
+                                    <img src="19.png" alt="老舊照片上色">
+                                </div>
+                                <div class="comparison-arrow">→</div>
+                                <div class="image-placeholder">
+                                    <img src="20.png" alt="賽博龐克風格動作">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="example-prompt">
+                            <strong>使用提示詞：</strong>
+                            <div class="prompt-display">
+                                <code>老照片先讓 AI 修復成黑白同時加強反差（所以你提示詞要說：修復成黑白照片並加強反差），再讓它上色，效果會更理想                                </code>
+                                <button class="copy-btn" data-copy="老照片先讓 AI 修復成黑白同時加強反差（所以你提示詞要說：修復成黑白照片並加強反差                                ），再讓它上色，效果會更理想">📋</button>
+                            </div>
+                        </div>
+                    </div>
+                  <div class="example-item">
+                        <h3 class="example-title"> 卡通公仔</h3>
+                        <p class="example-description">卡通公仔！</p>
+                        <div class="before-after">
+                            <div class="image-comparison">
+                                <div class="image-placeholder">
+                                    <img src="21.png" alt="卡通公仔">
+                                </div>
+                                <div class="comparison-arrow">→</div>
+                                <div class="image-placeholder">
+                                    <img src="22.png" alt="賽博龐克風格動作">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="example-prompt">
+                            <strong>使用提示詞：</strong>
+                            <div class="prompt-display">
+                                <code>請將圖片中的角色轉化為1/7比例的全身實體模型，放置在一個圓形塑膠底座上，底座上的PVC紋理清晰可見。將模型放在電腦                                      桌上，並在電腦螢幕上顯示該角色的3D設計效果圖。此外，在桌面上放置一個印有該角色設計圖的、與模型尺寸相等的模型                                         盒</code>
+                                <button class="copy-btn" data-copy="請將圖片中的角色轉化為1/7比例的全身實體模型，放置在一個圓形塑膠底座上，底座上的                                PVC紋理清晰可見。將模型放在電腦桌上，並在電腦螢幕上顯示該角色的3D設計效果圖。此外，在桌面上放置一個印有該角色設計圖                                的、與模型尺寸相等的模型盒">📋</button>
+                            </div>
+                        </div>
+                    </div>
+                  <div class="example-item">
+                        <h3 class="example-title"> 韓國照片</h3>
+                        <p class="example-description">韓國照片！</p>
+                        <div class="before-after">
+                            <div class="image-comparison">
+                                <div class="image-placeholder">
+                                    <img src="23.png" alt="韓國照片">
+                                </div>
+                                <div class="comparison-arrow">→</div>
+                                <div class="image-placeholder">
+                                    <img src="24.png" alt="賽博龐克風格動作">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="example-prompt">
+                            <strong>使用提示詞：</strong>
+                            <div class="prompt-display">
+                                <code>請將圖片中的角色換成休閒西裝照片（深藍色西裝外套，白色上衣，灰色背景，攝影棚燈光)</code>
+                                <button class="copy-btn" data-copy="換成休閒西裝照片（深藍色西裝外套，白色上衣，灰色背景，攝影棚燈光)">📋</button>
+                            </div>
+                        </div>
+                    </div>
+                  <div class="example-item">
+                        <h3 class="example-title"> 多角色與物品融合 </h3>
+                        <p class="example-description">多角色與物品融合</p>
+                        <div class="before-after">
+                            <div class="image-comparison">
+                                <div class="image-placeholder">
+                                    <img src="25.png" alt="多角色與物品融合">
+                                </div>
+                                <div class="comparison-arrow">→</div>
+                                <div class="image-placeholder">
+                                    <img src="26.png" alt="賽博龐克風格動作">
+                                </div>
+                            </div>
+                        </div>
+                            <div class="example-prompt">
+                            <strong>使用提示詞：</strong>
+                            <div class="prompt-display">
+                                <code>「讓這些圖片融合成一張圖，每個物品和角色都不能缺漏。」</code>
+                                <button class="copy-btn" data-copy="「讓這些圖片融合成一張圖，每個物品和角色都不能缺漏。」">📋</button>
+                            </div>
+                        </div>
+                    </div>
+                  <div class="example-item">
+                        <h3 class="example-title"> 標示物更換 </h3>
+                        <p class="example-description">標示物更換</p>
+                        <div class="before-after">
+                            <div class="image-comparison">
+                                <div class="image-placeholder">
+                                    <img src="27.png" alt="標示物更換">
+                                </div>
+                                <div class="comparison-arrow">→</div>
+                                <div class="image-placeholder">
+                                    <img src="28.png" alt="賽博龐克風格動作">
+                                </div>
+                            </div>
+                        </div>
+                            <div class="example-prompt">
+                            <strong>使用提示詞：</strong>
+                            <div class="prompt-display">
+                                <code>「用上傳照片中右側的桌子替換掉紅框中的桌子。」</code>
+                                <button class="copy-btn" data-copy="「用上傳照片中右側的桌子替換掉紅框中的桌子。」」">📋</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="section section--database" id="database">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">提示詞資料庫</h2>
+                    <p class="section-subtitle">豐富的提示詞分類收藏，快速找到你需要的靈感</p>
+                </div>
+
+                <div class="database-controls">
+                    <div class="search-box">
+                        <input type="text" class="form-control" id="databaseSearch" placeholder="搜尋提示詞...">
+                        <button class="search-btn" id="searchBtn">🔍</button>
+                    </div>
+                    <div class="filter-tabs">
+                        <button class="filter-tab active" data-filter="all">全部</button>
+                        <button class="filter-tab" data-filter="basic">基礎編輯</button>
+                        <button class="filter-tab" data-filter="advanced">進階合成</button>
+                        <button class="filter-tab" data-filter="creative">創意應用</button>
+                        <button class="filter-tab" data-filter="professional">專業用途</button>
+                    </div>
+                </div>
+
+                <div class="database-content" id="databaseContent">
+                    </div>
+            </div>
+        </section>
+
+        <section class="section section--generator" id="generator">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">智能提示詞生成器</h2>
+                    <p class="section-subtitle">基於六大要素，輕鬆創建專業提示詞</p>
+                </div>
+
+                <div class="generator-content">
+                    <div class="generator-form">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label class="form-label">主體 (Subject)</label>
+                                <input type="text" class="form-control" id="subject" placeholder="一隻戴著巫師帽的貓">
+                                <small class="form-help">描述要畫的人或物</small>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">構圖 (Composition)</label>
+                                <input type="text" class="form-control" id="composition" placeholder="特寫鏡頭、由下往上的仰角">
+                                <small class="form-help">畫面安排方式</small>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">動作 (Action)</label>
+                                <input type="text" class="form-control" id="action" placeholder="正在施展魔法">
+                                <small class="form-help">主體在做什麼</small>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">地點 (Location)</label>
+                                <input type="text" class="form-control" id="location" placeholder="在一個堆滿書的圖書館">
+                                <small class="form-help">場景設定</small>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">風格 (Style)</label>
+                                <input type="text" class="form-control" id="style" placeholder="水彩畫、3D動畫、電影感">
+                                <small class="form-help">藝術風格選擇</small>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">編輯指令 (Editing)</label>
+                                <input type="text" class="form-control" id="editing" placeholder="把沙發顏色改成藍色">
+                                <small class="form-help">具體修改要求</small>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn btn--primary" id="generatePrompt">生成提示詞</button>
+                            <button class="btn btn--outline" id="clearForm">清空表單</button>
+                        </div>
+                    </div>
+                    <div class="generator-result">
+                        <h3>生成結果</h3>
+                        <div class="result-display" id="generatedPrompt">
+                            <div class="empty-result">
+                                <div class="empty-icon">✨</div>
+                                <div class="empty-text">填寫表單後點擊「生成提示詞」即可生成專業提示詞</div>
+                            </div>
+                        </div>
+                        <div class="result-actions hidden" id="resultActions">
+                            <button class="btn btn--outline btn--sm" id="copyResult">複製結果</button>
+                            <button class="btn btn--outline btn--sm" id="favoriteResult">❤️ 收藏</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section section--tutorial" id="tutorial">
+            <div class="container">
+                <div class="section-header">
+                    <h2 class="section-title">APP製作教學</h2>
+                    <p class="section-subtitle">學習如何在 Google AI Studio 中創建自己的 Nano Banana 應用</p>
+                </div>
+
+                <div class="tutorial-content">
+                    <div class="tutorial-steps">
+                        <div class="step-item">
+                            <div class="step-number">
+                                <div class="step-icon">🔧</div>
+                                <div class="step-num">1</div>
+                            </div>
+                            <div class="step-content">
+                                <h3>打開 Google AI Studio</h3>
+                                <p>點選左邊的'Build'(拼圖按鈕)</p>
+                                <div class="step-details">
+                                    <ul>
+                                        <li>前往 <a href="https://ai.studio.google.com" target="_blank">ai.studio.google.com</a></li>
+                                        <li>登入您的 Google 帳號</li>
+                                        <li>點擊左側邊欄的 Build 按鈕</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="step-item">
+                            <div class="step-number">
+                                <div class="step-icon">💭</div>
+                                <div class="step-num">2</div>
+                            </div>
+                            <div class="step-content">
+                                <h3>輸入程式提示詞</h3>
+                                <p>描述你要的功能，例如換衣服、製作公仔等</p>
+                                <div class="step-details">
+                                    <div class="code-example">
+                                        <h4>範例提示詞：</h4>
+                                        <code>創建一個圖像編輯APP，左邊上傳人物圖片，右邊上傳衣服圖片，自動合成穿搭效果</code>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="step-item">
+                            <div class="step-number">
+                                <div class="step-icon">▶️</div>
+                                <div class="step-num">3</div>
+                            </div>
+                            <div class="step-content">
+                                <h3>點擊Run Prompt</h3>
+                                <p>按右邊的箭頭向上按鈕，即可生成APP</p>
+                                <div class="step-details">
+                                    <ul>
+                                        <li>檢查生成的APP功能</li>
+                                        <li>測試各項功能是否正常</li>
+                                        <li>進行必要的調整和優化</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="app-examples">
+                        <h3>實用APP範例</h3>
+                        <div class="examples-grid">
+                            <div class="app-example">
+                                <div class="app-icon">👕</div>
+                                <h4>人物換裝APP</h4>
+                                <p>左邊上傳人物圖片，右邊上傳衣服圖片，自動合成穿搭效果</p>
+                                <div class="app-features">
+                                    <span class="feature-tag">服裝替換</span>
+                                    <span class="feature-tag">色彩調整</span>
+                                    <span class="feature-tag">尺寸適配</span>
+                                </div>
+                            </div>
+                            <div class="app-example">
+                                <div class="app-icon">🎎</div>
+                                <h4>公仔製作APP</h4>
+                                <p>將角色轉化為1/7比例實體模型，包含底座和包裝盒</p>
+                                <div class="app-features">
+                                    <span class="feature-tag">3D建模</span>
+                                    <span class="feature-tag">材質渲染</span>
+                                    <span class="feature-tag">場景設計</span>
+                                </div>
+                            </div>
+                            <div class="app-example">
+                                <div class="app-icon">📸</div>
+                                <h4>韓系照片APP</h4>
+                                <p>自動轉換成韓式商務照片風格</p>
+                                <div class="app-features">
+                                    <span class="feature-tag">風格轉換</span>
+                                    <span class="feature-tag">光影調整</span>
+                                    <span class="feature-tag">色調統一</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div class="toast hidden" id="toast">
+        <div class="toast__icon" id="toastIcon">✅</div>
+        <div class="toast__message" id="toastMessage"></div>
+        <button class="toast__close" id="toastClose">✕</button>
+    </div>
+
+    <div class="mobile-overlay hidden" id="mobileOverlay"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
