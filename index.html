@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nano Banana Pro 提示詞大師 v1.3.0</title>
+    
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <!-- Google Fonts: Noto Sans TC -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #fcfbf9; /* 溫暖的米白色背景 */
+        }
+        
+        /* 自定義捲軸 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #d4d4d4; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a3a3a3; 
+        }
+
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Modal Animation */
+        .modal-overlay {
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+        
+        .slide-up-enter {
+            transform: translateY(20px);
+            opacity: 0;
+        }
+        .slide-up-enter-active {
+            transform: translateY(0);
+            opacity: 1;
+            transition: all 300ms ease-out;
+        }
+
+        /* Category Scroll Hide */
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+        
+        // 圖標組件
+        const Icons = {
+            Copy: ({ className }) => <i data-lucide="copy" className={className}></i>,
+            Maximize: ({ className }) => <i data-lucide="maximize" className={className}></i>,
+            Minimize: ({ className }) => <i data-lucide="minimize" className={className}></i>,
+            Banana: ({ className }) => <i data-lucide="banana" className={className}></i>,
+            Sparkles: ({ className }) => <i data-lucide="sparkles" className={className}></i>,
+            Check: ({ className }) => <i data-lucide="check" className={className}></i>,
+            Filter: ({ className }) => <i data-lucide="filter" className={className}></i>,
+            Info: ({ className }) => <i data-lucide="info" className={className}></i>,
+            BookOpen: ({ className }) => <i data-lucide="book-open" className={className}></i>,
+            Wand2: ({ className }) => <i data-lucide="wand-2" className={className}></i>,
+            X: ({ className }) => <i data-lucide="x" className={className}></i>,
+            Map: ({ className }) => <i data-lucide="map" className={className}></i>,
+            HelpCircle: ({ className }) => <i data-lucide="help-circle" className={className}></i>,
+        };
+
+        // 資料來源
+        const promptsData = [
+             // --- User Provided New Examples ---
+            {
+                id: 201,
+                title: "桃園 6 大景點手繪水彩地圖",
+                category: "地圖",
+                tags: ["手繪", "水彩", "桃園", "地圖"],
+                content: "手繪水彩風格的桃園旅遊地圖插畫，以柔和水彩暈染、清新自然筆觸呈現。整體像一本旅行手帳的地圖視覺，中央繪製桃園地形輪廓，六大景點以可愛水彩插畫分布在對應位置，所有標題與介紹皆使用繁體中文。\n\n地圖上標示：\n①〈拉拉山國家森林遊樂區〉：位於地圖偏東側，高山雲霧、巨木森林、木棧步道的水彩插畫，附一句中文描述：「雲霧繚繞的高山秘境與千年巨木群，桃園最具代表性的自然景觀。」\n②〈台灣客家茶文化館〉：位於地圖中央偏南，茶田層層、茶具、木造建物的水彩插畫，附中文描述：「展現客家茶文化之美的知性展館，融合茶香、建築與文化體驗。」\n③〈慈湖園區〉：在地圖中央偏東，一片湖面倒映群山的水彩景象，附中文描述：「以寧靜湖景與自然步道著稱，是悠閒散步與賞景的清幽地點。」\n④〈永安漁港〉：在地圖西側靠海位置，漁船、海面、夕陽、水藍色海港插畫，附中文描述：「結合海景、漁村與美食的海港風情，充滿悠閒與活力。」\n⑤〈橫山書法藝術館〉：位於地圖中央偏北，以黑白幾何建築、水墨筆勢、水彩灰黑色調呈現，附中文描述：「融合自然景觀的現代書法藝術館，建築與書藝相映成趣。」\n⑥〈太平洋自行車博物館〉：位於地圖中間西南，自行車、水彩博物館建築呈現動感風格，附中文描述：「展示從古董到現代的多元單車文化，是親子與車迷最愛的特色博物館。」\n\n地圖外加可愛風的方位圖、雲朵、太陽、道路線條元素，整體風格清新、溫暖、具有旅遊手繪地圖魅力，全圖使用繁體中文標示。",
+                desc: "整合單張的高細節手繪水彩地圖，包含地理位置與詳細景點描述。"
+            },
+            {
+                id: 202,
+                title: "台灣九座國家公園資訊圖",
+                category: "教育",
+                tags: ["黑板風格", "粉筆畫", "資訊圖表", "國家公園"],
+                content: "創作一幅橫式資訊圖表，主題為「台灣九座國家公園：自然與文化瑰寶巡禮」，採用黑板粉筆畫風格，繁體中文字體。\n\n**整體風格**：黑色或深灰色背景，模擬黑板質感，白色和彩色粉筆手繪插畫風格，裝飾性藤蔓和花卉邊框環繞整幅圖。\n\n**標題區**（頂部居中）：「台灣九座國家公園：自然與文化瑰寶巡禮」，使用白色粉筆書法字體。\n\n**九座國家公園分區展示**（以圓形或不規則區域劃分，互相連接）：\n1. 墾丁國家公園（左上）：插畫（燈塔、海岸岩石、珊瑚、熱帶魚），說明：「台灣第一座國家公園，以珊瑚礁海岸地形、豐富海洋生態聞名全球。」\n2. 玉山國家公園（中上偏左）：插畫（玉山主峰、台灣黑熊），說明：「擁有東北亞最高峰『玉山』，以高山峻嶺與黑熊棲地為特色。」\n3. 陽明山國家公園（右上）：插畫（火山口、溫泉、繡球花），說明：「鄰近都會區的火山地景公園。」\n4. 太魯閣國家公園（右側）：插畫（大理石峽谷、斷崖），說明：「以雄偉的大理石峽谷聞名。」\n5. 雪霸國家公園（中央偏上）：插畫（雪山主峰、櫻花鉤吻鮭），說明：「以『雪霸聖稜』與珍貴生態資源著稱。」\n6. 金門國家公園（左中）：插畫（閩南古厝、戴勝鳥），說明：「以戰地史蹟與文化資產聞名。」\n7. 東沙環礁國家公園（左下）：插畫（環礁島嶼、珊瑚礁），說明：「台灣首座海洋型國家公園。」\n8. 台江國家公園（中下）：插畫（紅樹林、黑面琵鷺），說明：「兼具歷史與濕地生態。」\n9. 澎湖南方四島國家公園（右下）：插畫（玄武岩、傳統聚落），說明：「以玄武岩地質與海洋生態為特色。」\n\n**色彩**：海洋藍青、山脈灰白、植物綠、花卉粉紫。所有文字使用繁體中文，清晰易讀。",
+                desc: "黑板粉筆風格的教育性資訊圖表，結構複雜且圖文並茂。"
+            },
+            {
+                id: 203,
+                title: "川劇變臉解密拆解圖",
+                category: "文化",
+                tags: ["傳統文化", "解密圖", "16:9", "繁體中文"],
+                content: "生成一張中國川劇變臉這門絕技的解密拆解圖,中文繁体字体不要变形。宽高比16:9",
+                desc: "測試 AI 對於傳統技藝結構與圖解的能力。"
+            },
+            {
+                id: 204,
+                title: "台灣冬季8日環島行程地圖",
+                category: "地圖",
+                tags: ["冬季", "環島", "水彩", "旅行手帳"],
+                content: "高細節手繪水彩風格的繁體中文《台灣冬季8日環島行程地圖插畫》。中央以溫暖水彩（米黃、棕色、灰藍）描繪台灣地形，加入山脈起伏、海岸線紋理、冬季薄霧效果。以淡彩＋墨線呈現旅行手帳風格，在紙張上保留纖維質感。各日景點以小插畫貼紙方式分散在地圖四周，以紅色虛線連接行程，加入雪花、落葉、冷色天光等冬季元素。所有繁體中文文字需清晰、端正、不變形。\n\nDay 1 台北：台北101、小籠包、平溪鐵路\nDay 2 宜蘭：礁溪溫泉、蔥油餅、蘭陽博物館\nDay 3 花蓮：太魯閣峽谷、清水斷崖、麻糬\nDay 4 台東：金色稻田、三仙台拱橋、池上便當\nDay 5 高雄：駁二藝術特區、夜市、海鮮盤\nDay 6 台南：安平老街、機車穿街景、擔仔麵\nDay 7 嘉義：阿里山森林鐵路、日出雲海\nDay 8 台中・苗栗・南投：高美濕地、日月潭、客家美食\n行程天數要用中文繁体文字標示出。\n風格：高細節水彩、淡彩墨線、暖冷交錯冬季配色、旅行日誌美學、紙張質感。",
+                desc: "結合時間軸與環島路徑的冬季主題地圖。"
+            },
+            {
+                id: 205,
+                title: "唐代長安地圖 (工笔重彩)",
+                category: "歷史",
+                tags: ["唐代", "仕女畫", "長卷", "地圖"],
+                content: "画幅比例16:9，一幅令人叹为观止的插画地图学杰作，描绘了唐代首都长安的地图。整个画面以唐代仕女画的精致风格呈现，令人联想到绘画大师周昉的作品。媒材是在陈旧、细腻的绢本上使用工笔重彩。字体都要用中文繁体輸出。\n\n**构图与透视:** 地图采用“散点透视”的长卷形式。城市感觉更像一幅生动的织锦。朱雀大街作为画面的中轴线。\n**微型场景地标:** 大明宫(宫廷仕女演奏)、西市(粟特商人交易)、曲江池(曲水流觞)。\n**一百零八坊:** 由一个个优雅的手绘长方形印章代表，用小篆字体填充合理的双字坊名(如平康坊、崇仁坊)。\n**主标题:** “大唐长安”以雄浑大气的隶书，竖排书写在右上角。\n**美学:** 调色板丰富而华丽（朱砂、石绿、石青、金箔）。线条如“游丝描”般细劲流畅。",
+                desc: "極致華麗的歷史復原風格，結合地圖與工筆畫藝術。"
+            },
+            {
+                id: 206,
+                title: "巴黎 11天10夜 故事書插畫 (Tony版)",
+                category: "旅遊攻略",
+                tags: ["故事書風格", "一致性", "敘事", "Tony心得"],
+                content: "**# 角色與目標**\n你是一位專業的旅遊插畫家。你的目標是將我提供的文字行程表，轉化為一幅迷人、手繪水彩風格的資訊圖表地圖。成品的視覺風格必須完全參照一本溫馨的故事書插畫。\n\n**# 視覺風格要求**\n* **藝術風格:** 溫暖、迷人、手繪水彩插畫。使用柔和的輪廓線、溫潤的紋理，以及舒適的色調（粉彩、暖黃、藍色與粉色）。\n* **版面與動線:** 一條蜿蜒的、按時間順序排列的路徑，從上方開始向下延伸。使用虛線將各個事件連接。\n* **氛圍:** 營造浪漫的巴黎氛圍，背景需包含櫻花、巴黎街燈和奧斯曼式建築。\n\n**# 內容元素**\n1. **時間:** 清晰的時鐘圖示顯示具體時間。\n2. **地點/活動插畫:** 繪製具體交通工具、飯店/餐廳真實外觀立面、特定菜餚插畫。\n3. **文字標籤:** 手寫但整潔的字體，包含地點名稱、地址及關鍵描述。\n\n**# 頁首標題**\n裝飾性橫幅，標示「DAY 1 到達巴黎」和日期。\n\n[請在此處貼上您的巴黎行程文字資料]",
+                desc: "來自 Tony 的「寫輪眼大法」提示詞，強調故事書風格與高度一致性。"
+            },
+            {
+                id: 207,
+                title: "週末 9 張照片合輯",
+                category: "編輯",
+                tags: ["拼貼", "生活", "網格"],
+                content: "生成此人週末的 9 張「照片合輯」網格：一張鏡子自拍照、一張咖啡館照片、與朋友共進晚餐、一張模糊的派對照片、一張散步照片、一張筆記型電腦/咖啡工作照、一個寵物時刻、一張日落照，以及一張開懷大笑的抓拍。",
+                desc: "生成具備生活感的九宮格照片集。"
+            },
+            {
+                id: 208,
+                title: "東京上野 5 日旅遊整合地圖",
+                category: "地圖",
+                tags: ["上野", "輻射狀構圖", "日系"],
+                content: "手繪水彩風格、柔和暈染筆觸、日系旅行插畫，製作一張「東京上野 5 日旅遊整合地圖」。整張圖以上野為中心，向外輻射呈現五天行程的代表景點。整體以水彩背景鋪底、色調清新、帶可愛地圖感。\n\n清楚標示所有主要景點並附繁體中文文字：\n【Day1 上野區】上野恩賜公園、阿美橫町等。\n【Day2 淺草〜晴空塔】雷門、晴空塔等。\n【Day3 秋葉原〜湯島】秋葉原電器街、湯島天滿宮等。\n【Day4 台場】彩虹大橋、鋼彈立像、teamLab。\n【Day5 谷中〜東大】谷中銀座、東京大學等。\n\n畫面佈局採地圖式分區，加入箭頭指向、簡易街道線、建築小圖示與可愛旅行元素。標題：「東京上野 5 日遊旅遊地圖」。比例16：9",
+                desc: "以上野為中心的輻射狀地圖設計。"
+            },
+            {
+                id: 209,
+                title: "農曆新年復古菜單海報",
+                category: "美食",
+                tags: ["美食攝影", "海報", "春節", "復古"],
+                content: "核心提示詞: (傑作, 最高品質, 高解析度, 超細節), 直式海報設計, 農曆新年菜單, 繁體中文藝術字 \"新東方復古\" 風格美學。色調: 深絳紅色為主, 拉絲霧金色邊框, 背景深孔雀藍綠色。頂部標題區域有大型傳統書法。標題下方是豐盛的專業美食攝影：熱氣騰騰的佛跳牆砂鍋, 清蒸全魚, 滷豬腳, 烤全雞, 擺放在復古圓桌上。海報中央有金色邊框區塊強調套餐。電影般的光線, 8K解析度。\n\n反向提示詞: (低品質, 最差品質:1.4), 模糊, 醜陋的食物, 令人倒胃口, 浮水印, 醜陋的字體。",
+                desc: "結合美食攝影與平面設計的高質感年菜海報。"
+            },
+            {
+                id: 210,
+                title: "心臟與動脈健康科學插畫",
+                category: "科學",
+                tags: ["醫學插畫", "3D", "血管", "繁體中文"],
+                content: "中文繁体文字： 心臟與動脈健康宏觀科學插畫，清潔血管內壁過程，高細節3D解剖圖。核心：燕麥 (beta-葡聚醣)、深海魚 (Omega-3)、大蒜 (一氧化氮)、綠葉蔬菜和紅石榴 (抗氧化劑)。強調血液循環與抗氧化，專業醫學插圖風格，清晰線條，高飽和度，明亮的光線。",
+                desc: "專業風格的醫學科學解說圖。"
+            },
+            {
+                id: 211,
+                title: "日本七日遊資料卡 (福岡/熊本)",
+                category: "旅遊攻略",
+                tags: ["資料卡", "手繪插畫", "九州"],
+                content: "請根據下述給我日本七日遊旅遊資料卡，只要每日行程景點與簡要中文繁体說明，風格用手繪插畫風格：\nDay 1 抵達福岡：博多牛腸鍋、中洲屋台。\nDay 2 福岡市區：櫛田神社、天神地下街、福岡塔。\nDay 3 福岡→熊本：九州新幹線、熊本城、勝烈亭炸豬排。\nDay 4 高千穗峽谷：划船體驗、流水素麵。\nDay 5 熊本→福岡：熊本部長辦公室、博多運河城。\nDay 6 太宰府：天滿宮、梅枝餅、LaLaport 鋼彈。\nDay 7 返程：機場免稅店採購。\n(請將上述內容製作成一系列圖卡)",
+                desc: "將詳細的九州行程轉換為易讀的每日圖卡。"
+            },
+            {
+                id: 212,
+                title: "沖繩主題手繪海報",
+                category: "海報",
+                tags: ["沖繩", "海報", "行程"],
+                content: "幫我設計一張沖繩主題海報,圖內需要參考提供景點資訊,包含景點特色、文化、親子活動小插圖和說明,手繪海報風格。\n行程：\nDay1: 晚餐(壽司/炸豬排/鰻魚飯/拉麵), 逛國際通超市。\nDay2: 美麗海水族館, 晚餐(鳥玉), 逛淳久堂書店。\nDay3: 玉泉洞, 午餐(蕎麥麵), 逛琉貿百貨, 晚餐(A&W/島豚屋)。\nDay4: 波上宮, 午餐(通堂拉麵), Aeon。\nDay5: 牧志市場, 沖宮, 陶瓷店, 機場。",
+                desc: "包含豐富店家資訊的沖繩手繪海報。"
+            },
+            {
+                id: 213,
+                title: "2026 桃園月曆卡 (5, 6, 12月)",
+                category: "資訊圖表",
+                tags: ["月曆", "水彩", "桃園"],
+                content: "請分別製作以下三張繁體中文月曆卡，比例 9:16：\n1. 【12月】主題〈桃園跨年 × 冬季遊程〉，色調粉紅與大紅，標題：〈2026 十二月・光之旅〉。注意：12月1日為星期二。\n2. 【6月】主題〈永安漁港 × 海味仲夏〉，海岸、漁船、夕陽，色調藍橘。標題：〈2026 六月・永安海風〉。注意：6月1日是星期一。\n3. 【5月】主題〈復興區繡球花 × 泰雅族文化〉，淡紫與藍色花海。標題：〈2026 五月・山嵐花季與泰雅色彩〉。注意：5月1日是星期五。",
+                desc: "結合季節特色與正確日期的月曆設計。"
+            },
+            {
+                id: 214,
+                title: "桃園未來 5 天氣象圖",
+                category: "氣象",
+                tags: ["氣象預報", "趨勢圖", "資訊圖表"],
+                content: "幫我生成繁体中文桃園市2025年11/23至11/27日未來5天氣象圖，其除每天氣侯圖圖示並要有最高與最低兩條不同色彩線趨勢圖，參考中央氣象署預報，注意日期是2025年11/23（日）至11/27（四）且預報氣候要精確。",
+                desc: "包含趨勢折線圖的專業氣象預報圖。"
+            },
+            {
+                id: 215,
+                title: "四季手繪填空教學圖",
+                category: "教育",
+                tags: ["教學", "填空", "四季", "互動"],
+                content: "【教學新點子】用一張「手繪填空圖」帶領學生趣味學四季\n「國學常識：四季季節判斷」手繪填空圖。\n特色：溫暖的手繪彩色鉛筆風格。圖文對照：將四季的關鍵視覺元素（荷花、楓葉、雪景等）與相關的國學描述並置。互動式填空設計：故意隱藏了詩句中的關鍵字（________）以激發學生回憶。",
+                desc: "具備互動填空功能的教育輔助教材。"
+            },
+            {
+                id: 216,
+                title: "沉默的羔羊電影海報",
+                category: "設計",
+                tags: ["電影海報", "心理恐怖", "對稱構圖"],
+                content: "創作一張《沉默的羔羊》電影海報，融合巴洛克戲劇性光影與現代心理恐怖元素。畫面採用達·芬奇式的左右對稱構圖，中央是女主角面部特寫，面部被分割：一半在冷調審訊室藍光下，一半在地牢陰影中。瞳孔反射漢尼拔輪廓。背景多層次設計：最近層是死亡之頭蛾的翅膀，翅膀上的骷髏圖案被放大。",
+                desc: "高層次的藝術與電影海報設計。"
+            },
+            {
+                id: 217,
+                title: "拜登愛犬與 Nano Banana Pro",
+                category: "創意",
+                tags: ["新聞", "幽默", "時事"],
+                content: "生成圖片：拜登養的那隻狗的品種，踩著滑板舉著一份中文繁体報紙，報紙的頭條新聞是\" 2025 年 11月 20日 Google 隆重推出殺手級Nano Banana pro\"/\"其他AI公司面臨生死存亡關頭”",
+                desc: "結合時事標題與幽默元素的創意生成。"
+            },
+            {
+                id: 218,
+                title: "3 分鐘肩部伸展運動圖",
+                category: "健康",
+                tags: ["運動", "教學", "繁體中文"],
+                content: "請建立一個關於「3 分鐘肩部伸展運動」的圖表並以繁体中文文字說明。請使用最少的插圖，並以上傳圖片的人物作為模特兒。尺寸為 3:4。",
+                desc: "簡潔明瞭的運動教學圖表。"
+            },
+            {
+                id: 219,
+                title: "咖啡飲品資訊圖表",
+                category: "美食",
+                tags: ["咖啡", "資訊圖表", "菜單"],
+                content: "製作一張資訊圖表，展示不同的咖啡飲品（如拿鐵、卡布奇諾、美式等），註解說明用中文繁体文字。",
+                desc: "實用的咖啡種類介紹圖。"
+            },
+            {
+                id: 220,
+                title: "房地產投資優缺點",
+                category: "資訊圖表",
+                tags: ["金融", "比較圖", "房地產"],
+                content: "請建立一張圖片，用中文繁体字顯示房地產投資的優點和缺點。",
+                desc: "金融類別的比較分析圖表。"
+            },
+            // --- Original Examples (Keep IDs consistent) ---
+            {
+                id: 101,
+                title: "東京 4天3夜 旅遊攻略圖 (日式插畫)",
+                category: "旅遊攻略",
+                tags: ["行程規劃", "日式插畫", "16:9", "繁體中文"],
+                content: "請幫我繪製一個 4 天 3 夜的東京旅遊行程插畫，我的規劃如下：\n1. 住在 APA Hotel Akihabara Suehirocho Ekimae\n2. 「第一天」在新宿區域逛逛，到東京都廳展望室欣賞東京市景。晚餐在新宿吃燒肉。\n3. 「第二天」上午前往淺草寺，漫步雷門、仲見世通，感受傳統東京風情。中午在淺草附近享用傳統日本料理。下午到上野公園散步、看看博物館。傍晚到上野找些路邊美食市場或小餐館。晚餐吃壽司。\n4. 「第三天」上午前往銀座，感受奢華氛圍。中午到築地場外市場品嚐新鮮海鮮。下午可轉至東京塔或六本木丘展望台欣賞城市景觀。晚餐吃 Tofuya Ukai、然後到港區漫步。\n5. 「第四天」上午前往秋葉原，下午返回飯店整理行李、退房，回台灣。\n\n請根據我的行程規劃，加入適當的細節，然後根據我安排的行程，依序畫成一張日式插畫的旅遊攻略圖，我提到的地點、環境、景觀、食物、餐廳，都要在圖中提到，且儘可能的擬真。插圖的比例為 16:9，整體要給人溫暖的氛圍，並確保內容都是繁體中文",
+                desc: "Nano Banana Pro 能夠生成包含正確繁體中文與路徑指示的旅遊地圖。適合分享給旅伴。"
+            },
+            {
+                id: 102,
+                title: "東京 4天3夜 旅遊攻略圖 (真實風格)",
+                category: "旅遊攻略",
+                tags: ["行程規劃", "真實照片風", "16:9"],
+                content: "請幫我繪製一個 4 天 3 夜的東京旅遊行程插畫，我的規劃如下：\n(同上行程內容...)\n\n請根據我的行程規劃，加入適當的細節，然後根據我安排的行程，依序畫成一張真實風格的旅遊攻略圖，我提到的地點、環境、景觀、食物、餐廳，都要在圖中提到。插圖的比例為 16:9，確保內容都是繁體中文。",
+                desc: "將風格改為真實照片風格，呈現如同旅遊雜誌般的質感。"
+            },
+             {
+                id: 1,
+                title: "Windows 11 網頁截圖",
+                category: "寫實",
+                tags: ["UI設計", "螢幕截圖", "複雜場景"],
+                content: "生成一張 Windows 11 桌面的截圖，畫面中開啟著 Google Chrome，顯示在 YouTube.com 上 Mr. Beast 的縮圖。",
+                desc: "展示 Nano Banana Pro 處理複雜 UI 介面與嵌套內容（瀏覽器內的網頁）的能力。"
+            },
+             {
+                id: 5,
+                title: "創意文字材質",
+                category: "文字設計",
+                tags: ["Typography", "創意", "材質"],
+                content: "製作一張圖片，把『How much wood would a woodchuck chuck if a woodchuck could chuck wood』這句話，用土撥鼠啃過的木頭組成整句文字。",
+                desc: "Nano Banana Pro 的強項：將文字內容與物體材質完美融合。"
+            },
+            {
+                id: 10,
+                title: "照片年代生成 (1880s-2025)",
+                category: "編輯",
+                tags: ["歷史", "人像", "網格"],
+                content: "製作一個 4x4 的網格，從 1880 年代開始。在每個區塊中，顯示同一人物依照該年代風格的造型，包括服裝、髮型、鬍鬚和配件。使用相應的顏色、背景和底片風格。",
+                desc: "展示跨越時間維度的風格一致性與變化。"
+            },
+            {
+                id: 11,
+                title: "產品包裝設計",
+                category: "設計",
+                tags: ["Mockup", "行銷", "3D"],
+                content: "創建一個逼真的產品包裝設計，採用極簡主義風格的有機護膚品瓶子，背景是柔和的自然光和綠葉陰影，瓶身上印有金色『PURE』字樣。",
+                desc: "商業攝影等級的產品模擬圖。"
+            }
+        ];
+
+        const Toast = ({ message, show }) => {
+            if (!show) return null;
+            return (
+                <div className="fixed bottom-8 right-8 z-50 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 transition-all duration-300 transform translate-y-0 animate-bounce">
+                    <Icons.Check className="w-5 h-5 text-green-400" />
+                    <span>{message}</span>
+                </div>
+            );
+        };
+
+        // Modal Component
+        const Modal = ({ isOpen, onClose, title, children, maxWidth = "max-w-2xl" }) => {
+            if (!isOpen) return null;
+            return (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-overlay">
+                    <div className={`bg-white rounded-2xl shadow-2xl w-full ${maxWidth} max-h-[90vh] overflow-y-auto flex flex-col relative`}>
+                        <div className="sticky top-0 bg-white p-4 border-b border-stone-100 flex justify-between items-center z-10">
+                            <h3 className="text-xl font-bold text-stone-800 flex items-center gap-2">
+                                {title}
+                            </h3>
+                            <button onClick={onClose} className="p-2 hover:bg-stone-100 rounded-full text-stone-500 transition-colors">
+                                <Icons.X className="w-6 h-6" />
+                            </button>
+                        </div>
+                        <div className="p-6">
+                            {children}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // 提示詞生成器組件
+        const PromptGenerator = ({ onCopy }) => {
+            const [inputs, setInputs] = useState({
+                subject: "",
+                action: "",
+                scene: "",
+                style: "",
+                lighting: "",
+                composition: "",
+                extra: ""
+            });
+
+            const generatePrompt = () => {
+                const parts = [];
+                // 根據 Google 建議的結構組合
+                if (inputs.style) parts.push(`一張${inputs.style}風格的圖片`);
+                if (inputs.scene) parts.push(`場景在${inputs.scene}`);
+                if (inputs.subject) parts.push(`畫面主體是${inputs.subject}`);
+                if (inputs.action) parts.push(`正在${inputs.action}`);
+                if (inputs.lighting) parts.push(`光線為${inputs.lighting}`);
+                if (inputs.composition) parts.push(`採用${inputs.composition}構圖`);
+                if (inputs.extra) parts.push(`細節要求：${inputs.extra}`);
+                
+                return parts.join("，") + "。";
+            };
+
+            const fullPrompt = generatePrompt();
+
+            return (
+                <div className="space-y-4">
+                    <p className="text-sm text-stone-500 bg-stone-50 p-3 rounded-lg border border-stone-200">
+                        <Icons.Info className="w-4 h-4 inline mr-1" />
+                        只需填寫下方欄位，系統將自動組合成符合 Google 官方建議結構的專業提示詞。
+                    </p>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-stone-700 mb-1">主體 (Subject)</label>
+                            <input 
+                                type="text" 
+                                placeholder="例：戴著魔法帽的三花貓"
+                                className="w-full border border-stone-300 rounded-lg p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                                value={inputs.subject}
+                                onChange={e => setInputs({...inputs, subject: e.target.value})}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-stone-700 mb-1">動作 (Action)</label>
+                            <input 
+                                type="text" 
+                                placeholder="例：正在施放魔法"
+                                className="w-full border border-stone-300 rounded-lg p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                                value={inputs.action}
+                                onChange={e => setInputs({...inputs, action: e.target.value})}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-stone-700 mb-1">場景 (Scene)</label>
+                            <input 
+                                type="text" 
+                                placeholder="例：煉金術士的圖書館"
+                                className="w-full border border-stone-300 rounded-lg p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                                value={inputs.scene}
+                                onChange={e => setInputs({...inputs, scene: e.target.value})}
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-stone-700 mb-1">風格 (Style)</label>
+                            <select 
+                                className="w-full border border-stone-300 rounded-lg p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                                value={inputs.style}
+                                onChange={e => setInputs({...inputs, style: e.target.value})}
+                            >
+                                <option value="">選擇風格...</option>
+                                <option value="高寫實 (Photorealistic)">高寫實</option>
+                                <option value="3D 動畫">3D 動畫</option>
+                                <option value="水彩畫">水彩畫</option>
+                                <option value="賽博龐克">賽博龐克</option>
+                                <option value="日式插畫">日式插畫</option>
+                                <option value="電影感">電影感</option>
+                                <option value="90年代產品攝影">90年代產品攝影</option>
+                            </select>
+                        </div>
+                         <div>
+                            <label className="block text-sm font-medium text-stone-700 mb-1">光線/鏡頭 (Lighting/Lens)</label>
+                            <input 
+                                type="text" 
+                                placeholder="例：逆光、淺景深 f/1.8"
+                                className="w-full border border-stone-300 rounded-lg p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                                value={inputs.lighting}
+                                onChange={e => setInputs({...inputs, lighting: e.target.value})}
+                            />
+                        </div>
+                         <div>
+                            <label className="block text-sm font-medium text-stone-700 mb-1">構圖 (Composition)</label>
+                            <input 
+                                type="text" 
+                                placeholder="例：低角度、16:9 電影級構圖"
+                                className="w-full border border-stone-300 rounded-lg p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                                value={inputs.composition}
+                                onChange={e => setInputs({...inputs, composition: e.target.value})}
+                            />
+                        </div>
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-stone-700 mb-1">額外細節/編輯指令 (Extra)</label>
+                        <textarea 
+                            rows="2"
+                            placeholder="例：確保文字正確、右上角要有品牌Logo"
+                            className="w-full border border-stone-300 rounded-lg p-2 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none"
+                            value={inputs.extra}
+                            onChange={e => setInputs({...inputs, extra: e.target.value})}
+                        ></textarea>
+                    </div>
+
+                    <div className="mt-6 p-4 bg-stone-800 rounded-xl text-stone-100">
+                        <label className="text-xs font-bold text-stone-400 uppercase tracking-wider mb-2 block">預覽結果</label>
+                        <p className="font-medium text-lg min-h-[3rem]">{fullPrompt || "請輸入上方欄位..."}</p>
+                    </div>
+
+                    <button 
+                        onClick={() => onCopy(fullPrompt)}
+                        className="w-full py-3 bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 text-stone-900 font-bold rounded-xl shadow-lg transform active:scale-95 transition-all flex justify-center items-center gap-2"
+                    >
+                        <Icons.Copy className="w-5 h-5" />
+                        複製提示詞
+                    </button>
+                </div>
+            );
+        };
+
+        const Card = ({ item, onCopy }) => {
+            return (
+                <div className="bg-white rounded-xl p-6 border border-stone-200 transition-all duration-300 card-hover flex flex-col h-full relative group">
+                    <div className="flex justify-between items-start mb-3">
+                        <div className="flex items-center gap-2">
+                            <span className={`px-2 py-1 text-xs font-medium rounded-md ${
+                                item.category === '旅遊攻略' ? 'bg-blue-100 text-blue-800' : 
+                                item.category === '地圖' ? 'bg-emerald-100 text-emerald-800' :
+                                item.category === '美食' ? 'bg-orange-100 text-orange-800' :
+                                item.category === '歷史' ? 'bg-rose-100 text-rose-800' :
+                                'bg-yellow-100 text-yellow-800'
+                            }`}>
+                                {item.category}
+                            </span>
+                        </div>
+                        <button 
+                            onClick={() => onCopy(item.content)}
+                            className="text-stone-400 hover:text-green-600 transition-colors p-1 rounded hover:bg-green-50"
+                            title="複製提示詞"
+                        >
+                            <Icons.Copy className="w-5 h-5" />
+                        </button>
+                    </div>
+                    
+                    <h3 className="text-lg font-bold text-stone-800 mb-2">{item.title}</h3>
+                    
+                    <div className="bg-stone-50 p-4 rounded-lg border border-stone-100 mb-4 flex-grow relative overflow-hidden group-hover:border-green-100 transition-colors">
+                        <p className="text-stone-700 leading-relaxed font-medium text-sm whitespace-pre-line">
+                            {item.content.length > 180 ? item.content.substring(0, 180) + "..." : item.content}
+                        </p>
+                    </div>
+                    
+                    <div className="mt-auto">
+                        <p className="text-stone-500 text-xs mb-3 italic">
+                            <Icons.Info className="w-3 h-3 inline mr-1" />
+                            {item.desc}
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                            {item.tags.map((tag, idx) => (
+                                <span key={idx} className="text-xs text-stone-500 bg-stone-100 px-2 py-1 rounded-full">
+                                    #{tag}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const App = () => {
+            const [isFullscreen, setIsFullscreen] = useState(false);
+            const [filter, setFilter] = useState("全部");
+            const [toast, setToast] = useState({ show: false, message: "" });
+            
+            // Modal States
+            const [showGuide, setShowGuide] = useState(false);
+            const [showGenerator, setShowGenerator] = useState(false);
+            const [showIntro, setShowIntro] = useState(false);
+
+            // 更新後的分類列表
+            const categories = ["全部", "旅遊攻略", "地圖", "美食", "歷史", "教育", "科學", "寫實", "文字設計", "資訊圖表", "科幻", "設計", "海報", "編輯", "創意", "健康", "氣象", "文化"];
+
+            useEffect(() => {
+                lucide.createIcons();
+            }, [filter, isFullscreen, toast, showGuide, showGenerator, showIntro]);
+
+            const toggleFullscreen = () => {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                    setIsFullscreen(true);
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen();
+                        setIsFullscreen(false);
+                    }
+                }
+            };
+
+            const copyToClipboard = (text) => {
+                navigator.clipboard.writeText(text).then(() => {
+                    setToast({ show: true, message: "提示詞已複製！" });
+                    setTimeout(() => setToast({ show: false, message: "" }), 2000);
+                });
+            };
+
+            const filteredData = filter === "全部" 
+                ? promptsData 
+                : promptsData.filter(item => item.category === filter);
+
+            return (
+                <div className="min-h-screen flex flex-col text-stone-800">
+                    {/* Header */}
+                    <header className="bg-white border-b border-stone-200 sticky top-0 z-30 shadow-sm">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="bg-yellow-400 p-2 rounded-lg text-white shadow-sm">
+                                    <Icons.Banana className="w-6 h-6 text-stone-900" />
+                                </div>
+                                <div className="leading-tight">
+                                    <h1 className="text-xl font-bold tracking-tight text-stone-900 flex items-center gap-2">
+                                        Nano Banana Pro
+                                        <span className="text-green-600 text-sm bg-green-50 px-2 py-0.5 rounded-full border border-green-100">v1.3.0</span>
+                                    </h1>
+                                    <p className="text-xs text-stone-500 hidden sm:block">互動式提示詞視覺化大師</p>
+                                </div>
+                            </div>
+                            
+                            <div className="flex items-center gap-2 md:gap-4">
+                                <button 
+                                    onClick={() => setShowIntro(true)}
+                                    className="px-3 py-2 text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition-all flex items-center gap-2 text-sm font-medium"
+                                >
+                                    <Icons.HelpCircle className="w-4 h-4" />
+                                    <span className="hidden md:inline">關於模型</span>
+                                </button>
+                                
+                                <button 
+                                    onClick={() => setShowGuide(true)}
+                                    className="px-3 py-2 text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition-all flex items-center gap-2 text-sm font-medium"
+                                >
+                                    <Icons.BookOpen className="w-4 h-4" />
+                                    <span className="hidden md:inline">功能與技巧</span>
+                                </button>
+                                
+                                <button 
+                                    onClick={() => setShowGenerator(true)}
+                                    className="px-3 py-2 bg-stone-900 text-white hover:bg-stone-700 rounded-lg transition-all flex items-center gap-2 text-sm font-medium shadow-sm"
+                                >
+                                    <Icons.Wand2 className="w-4 h-4 text-yellow-300" />
+                                    <span className="hidden md:inline">提示詞生成器</span>
+                                </button>
+
+                                <div className="h-6 w-px bg-stone-200 mx-1"></div>
+
+                                <button 
+                                    onClick={toggleFullscreen}
+                                    className="p-2 text-stone-500 hover:text-stone-900 hover:bg-stone-100 rounded-lg transition-all"
+                                    title={isFullscreen ? "退出全螢幕" : "全螢幕模式"}
+                                >
+                                    {isFullscreen ? <Icons.Minimize className="w-5 h-5" /> : <Icons.Maximize className="w-5 h-5" />}
+                                </button>
+                            </div>
+                        </div>
+                    </header>
+
+                    {/* Main Content */}
+                    <main className="flex-grow p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto w-full">
+                        
+                        {/* Intro / Banner */}
+                        <div className="mb-8 bg-gradient-to-r from-green-600 to-emerald-700 rounded-2xl p-6 sm:p-10 text-white shadow-lg relative overflow-hidden">
+                            <div className="absolute top-0 right-0 opacity-10 transform translate-x-1/4 -translate-y-1/4">
+                                <Icons.Map className="w-64 h-64" />
+                            </div>
+                            <div className="relative z-10 max-w-3xl">
+                                <h2 className="text-3xl font-bold mb-4 flex items-center gap-2">
+                                    <Icons.Sparkles className="w-8 h-8 text-yellow-300" />
+                                    新增 20+ 組專業提示詞
+                                </h2>
+                                <p className="text-green-50 text-lg mb-6 leading-relaxed">
+                                    v1.3.0 大幅擴充！新增「關於模型」按鈕。
+                                </p>
+                                <div className="flex flex-wrap gap-2 max-w-full overflow-x-auto pb-2 hide-scrollbar">
+                                    {categories.map(cat => (
+                                        <button
+                                            key={cat}
+                                            onClick={() => setFilter(cat)}
+                                            className={`px-4 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap ${
+                                                filter === cat 
+                                                ? 'bg-white text-green-700 shadow-md' 
+                                                : 'bg-green-700/30 text-green-50 hover:bg-green-700/50'
+                                            }`}
+                                        >
+                                            {cat}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Grid Layout */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                            {filteredData.map(item => (
+                                <Card key={item.id} item={item} onCopy={copyToClipboard} />
+                            ))}
+                        </div>
+
+                        {/* Empty State */}
+                        {filteredData.length === 0 && (
+                            <div className="text-center py-20">
+                                <p className="text-stone-400 text-lg">沒有找到符合「{filter}」類別的提示詞。</p>
+                                <button 
+                                    onClick={() => setFilter("全部")}
+                                    className="mt-4 text-green-600 hover:underline"
+                                >
+                                    查看全部
+                                </button>
+                            </div>
+                        )}
+                    </main>
+
+                    {/* Footer */}
+                    <footer className="bg-white border-t border-stone-200 mt-12 py-8">
+                        <div className="max-w-7xl mx-auto px-4 text-center text-stone-500 text-sm">
+                            <p className="mb-2">資料來源整理自 Github (PicoTrex, muset-ai), Skywork, YouMind, KOC.com.tw</p>
+                            <p>© 2025 Nano Banana Pro 提示詞大師 - 軟體設計大師版本 v1.3.0</p>
+                        </div>
+                    </footer>
+
+                    {/* Toast Notification */}
+                    <Toast message={toast.message} show={toast.show} />
+
+                    {/* Guide Modal */}
+                    <Modal 
+                        isOpen={showGuide} 
+                        onClose={() => setShowGuide(false)} 
+                        title="Google 官方釋出 7 個 Nano Banana Pro 使用技巧"
+                    >
+                        <div className="space-y-6 text-stone-700">
+                            <section>
+                                <h4 className="font-bold text-green-700 mb-2 flex items-center gap-2">
+                                    <span className="bg-green-100 px-2 rounded">1</span> 建立清楚的畫面願景
+                                </h4>
+                                <p className="text-sm">提示詞應包含：<span className="font-medium">主體</span>(具體描述)、<span className="font-medium">構圖</span>(視角/鏡頭)、<span className="font-medium">動作</span>(正在做什麼)、<span className="font-medium">場景</span>(地點)、<span className="font-medium">風格</span>(美學/畫風)。</p>
+                            </section>
+                            <section>
+                                <h4 className="font-bold text-green-700 mb-2 flex items-center gap-2">
+                                    <span className="bg-green-100 px-2 rounded">2</span> 進階細節設定
+                                </h4>
+                                <ul className="list-disc pl-5 text-sm space-y-1">
+                                    <li>設定光圈/景深 (例如: f/1.8 淺景深)</li>
+                                    <li>指定光線氛圍 (例如: 逆光、黃昏)</li>
+                                    <li>文字呈現要求 (例如: 以粗體白色呈現標題)</li>
+                                </ul>
+                            </section>
+                            <section>
+                                <h4 className="font-bold text-green-700 mb-2 flex items-center gap-2">
+                                    <span className="bg-green-100 px-2 rounded">3</span> 善用世界知識與翻譯
+                                </h4>
+                                <p className="text-sm">利用 Gemini 的背景知識生成具正確細節的影像（如資訊圖表），或將圖片內文字翻譯成多國語言。</p>
+                            </section>
+                            <section>
+                                <h4 className="font-bold text-green-700 mb-2 flex items-center gap-2">
+                                    <span className="bg-green-100 px-2 rounded">4</span> 專業攝影棚控制
+                                </h4>
+                                <p className="text-sm">控制光線方向、鏡頭角度、焦距、色彩分級與材質質感。</p>
+                            </section>
+                            <section>
+                                <h4 className="font-bold text-green-700 mb-2 flex items-center gap-2">
+                                    <span className="bg-green-100 px-2 rounded">5</span> 精準影像尺寸
+                                </h4>
+                                <p className="text-sm">支援 1K、2K、4K 解析度，並可自由調整比例 (如 16:9, 9:16) 以符合不同平台。</p>
+                            </section>
+                            <section>
+                                <h4 className="font-bold text-green-700 mb-2 flex items-center gap-2">
+                                    <span className="bg-green-100 px-2 rounded">6</span> 維持一致性
+                                </h4>
+                                <p className="text-sm">可匯入 6~14 張圖片，保持角色外貌、風格一致，適合製作連貫的故事插圖。</p>
+                            </section>
+                            <section>
+                                <h4 className="font-bold text-green-700 mb-2 flex items-center gap-2">
+                                    <span className="bg-green-100 px-2 rounded">7</span> 品牌形象應用
+                                </h4>
+                                <p className="text-sm">穩定呈現品牌字型、配色、Logo，非常適合製作產品 Mockup 與廣告視覺。</p>
+                            </section>
+                        </div>
+                    </Modal>
+
+                    {/* Generator Modal */}
+                    <Modal 
+                        isOpen={showGenerator} 
+                        onClose={() => setShowGenerator(false)} 
+                        title={<span className="flex items-center gap-2"><Icons.Wand2 className="w-6 h-6 text-yellow-500"/> Nano Banana Pro 提示詞生成器</span>}
+                    >
+                        <PromptGenerator onCopy={copyToClipboard} />
+                    </Modal>
+                    
+                     {/* Intro Modal */}
+                    <Modal 
+                        isOpen={showIntro} 
+                        onClose={() => setShowIntro(false)} 
+                        title={<span className="flex items-center gap-2"><Icons.HelpCircle className="w-6 h-6 text-blue-500"/> 關於 Nano Banana Pro</span>}
+                    >
+                        <div className="space-y-8 text-stone-700">
+                            <section>
+                                <h4 className="text-lg font-bold text-stone-800 mb-3 border-b border-stone-200 pb-1">
+                                    產品概述
+                                </h4>
+                                <p className="leading-relaxed text-sm">
+                                    <span className="font-bold text-stone-900">Nano Banana Pro</span> 是 Google 基於最新 <span className="font-bold text-blue-600">Gemini 3</span> 架構所打造的旗艦級圖像生成模型。
+                                    它突破了傳統 AI 繪圖的限制，具備更強大的邏輯推理能力，能夠精準理解複雜的長篇提示詞，並將創意轉化為專業級的視覺作品。
+                                </p>
+                            </section>
+
+                            <section>
+                                <h4 className="text-lg font-bold text-stone-800 mb-3 border-b border-stone-200 pb-1">
+                                    核心特色
+                                </h4>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                                    <div className="bg-stone-50 p-3 rounded-lg">
+                                        <h5 className="font-bold text-stone-900 mb-1 flex items-center gap-1"><Icons.Sparkles className="w-4 h-4 text-yellow-500"/> 極致畫質</h5>
+                                        <p className="text-stone-600">支援原生 4K 解析度生成，細節豐富，光影真實。</p>
+                                    </div>
+                                    <div className="bg-stone-50 p-3 rounded-lg">
+                                        <h5 className="font-bold text-stone-900 mb-1 flex items-center gap-1"><Icons.Banana className="w-4 h-4 text-yellow-500"/> 精準文字</h5>
+                                        <p className="text-stone-600">完美渲染繁體中文與各國語言，不再是亂碼。</p>
+                                    </div>
+                                    <div className="bg-stone-50 p-3 rounded-lg">
+                                        <h5 className="font-bold text-stone-900 mb-1 flex items-center gap-1"><Icons.Check className="w-4 h-4 text-green-500"/> 高度一致性</h5>
+                                        <p className="text-stone-600">可維持角色、風格在多張圖片中的連貫性。</p>
+                                    </div>
+                                    <div className="bg-stone-50 p-3 rounded-lg">
+                                        <h5 className="font-bold text-stone-900 mb-1 flex items-center gap-1"><Icons.Map className="w-4 h-4 text-blue-500"/> 世界知識</h5>
+                                        <p className="text-stone-600">整合 Google Search，生成具備正確知識的圖表。</p>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <section>
+                                <h4 className="text-lg font-bold text-stone-800 mb-3 border-b border-stone-200 pb-1">
+                                    如何使用
+                                </h4>
+                                <ol className="list-decimal pl-5 space-y-2 text-sm">
+                                    <li>
+                                        <span className="font-bold text-stone-900">選擇模型：</span> 在 Gemini App 或支援的平台上，選擇「Thinking」或「Nano Banana Pro」模型。
+                                    </li>
+                                    <li>
+                                        <span className="font-bold text-stone-900">輸入提示詞：</span> 使用本工具提供的「提示詞生成器」或參考範例，輸入詳細的描述。
+                                    </li>
+                                    <li>
+                                        <span className="font-bold text-stone-900">調整與優化：</span> 若結果不滿意，可使用對話方式請 AI 修改（如：「把背景換成晚上」）。
+                                    </li>
+                                </ol>
+                            </section>
+                        </div>
+                    </Modal>
+
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
